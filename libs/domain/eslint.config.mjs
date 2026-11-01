@@ -3,20 +3,20 @@ import baseConfig from '../../eslint.config.mjs';
 export default [
   ...baseConfig,
   {
-    files: ['**/*.json'],
+    files: ['**/*.ts'],
     rules: {
-      '@nx/dependency-checks': [
+      'no-restricted-imports': [
         'error',
         {
-          ignoredFiles: [
-            '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
-            '{projectRoot}/vitest.config.{js,ts,mjs,mts}',
+          patterns: [
+            {
+              group: ['@angular/*', '@nestjs/*', '@supabase/*', '@web/*'],
+              message:
+                'libs/domain — чистый TS: без фреймворков, Supabase и кода приложения',
+            },
           ],
         },
       ],
-    },
-    languageOptions: {
-      parser: await import('jsonc-eslint-parser'),
     },
   },
 ];

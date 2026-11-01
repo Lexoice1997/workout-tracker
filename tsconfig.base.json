@@ -15,8 +15,9 @@
     "skipDefaultLibCheck": true,
     "strict": false,
     "paths": {
-      "@tracker/domain": ["./libs/domain/src/index.ts"],
-      "@tracker/db-types": ["./libs/db-types/src/index.ts"]
+      "@tracker/domain": ["libs/domain/src/index.ts"],
+      "@tracker/db-types": ["libs/db-types/src/index.ts"],
+      "@web/*": ["apps/web/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
