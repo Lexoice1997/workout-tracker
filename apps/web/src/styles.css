@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+/* apps/web/src/styles.css — Tailwind 4: конфиг в CSS, tailwind.config.js не нужен */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, system-ui, sans-serif;
+  --color-accent: #2563eb;        /* bg-accent, text-accent, border-accent */
+  --color-accent-strong: #1d4ed8; /* hover */
+  --color-accent-soft: #dbeafe;   /* фон бейджей «Добавь вес» */
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body { @apply bg-stone-100 text-stone-900 antialiased; }
+}

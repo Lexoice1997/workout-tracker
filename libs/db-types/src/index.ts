@@ -1,1 +1,1 @@
-export * from './lib/db-types';
+export * from './database.types';
