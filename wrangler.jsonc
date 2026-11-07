@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "workout-tracker",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist/apps/web/browser",
+    "not_found_handling": "single-page-application"
+  }
+}
