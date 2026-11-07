@@ -1,11 +1,12 @@
-// apps/web/src/app/app.ts — корень: только router-outlet
+// apps/web/src/app/app.ts — корень: баннер обновления + router-outlet
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { UpdateBanner } from './layout/update-banner';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, UpdateBanner],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<router-outlet />`,
+  template: `<app-update-banner /><router-outlet />`,
 })
 export class App {}

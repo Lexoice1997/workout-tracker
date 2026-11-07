@@ -5,3 +5,4 @@ allowBuilds:
   lmdb: false
   msgpackr-extract: false
   '@parcel/watcher': false
+  workerd: set this to true or false
