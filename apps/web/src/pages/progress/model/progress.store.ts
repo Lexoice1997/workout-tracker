@@ -1,17 +1,23 @@
 // apps/web/src/pages/progress/model/progress.store.ts — @ngrx/signals 22
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
-import { e1rm, forecast, progressSeries, type Forecast } from '@tracker/domain';
-import { GoalRepository, type ExerciseLog, type ExerciseOption, type GoalInput, type GoalItem } from '@web/entities/goal';
+import {
+  e1rm, forecast, goalChart, progressSeries, revision, weekStart,
+  type Forecast, type GoalChartModel, type Revision,
+} from '@tracker/domain';
+import { GoalRepository, type ExerciseLog, type ExerciseOption, type GoalInput, type GoalItem, type TrainingCycle } from '@web/entities/goal';
+import { draftStorage } from '@web/shared/lib/draft-storage';
 import { todayLocal } from '@web/shared/lib/local-date';
 
-const HISTORY_DAYS = 16 * 7; // темп считается по 4 неделям, 16 — с запасом на пропуски
+const HISTORY_DAYS = 26 * 7; // темп — по 4 неделям, график — полгода
 
 interface ProgressState {
   readonly today: string;
   readonly goals: readonly GoalItem[];
   readonly logs: readonly ExerciseLog[];
   readonly exercises: readonly ExerciseOption[];
+  readonly cycle: TrainingCycle | null;
+  readonly dismissed: readonly string[]; // ключи «оставить как есть» на эту неделю
   readonly status: 'loading' | 'ready' | 'error';
   readonly error: string | null;
   readonly editing: string | null; // id цели или 'new'
@@ -25,7 +31,13 @@ export interface GoalCardVm {
   readonly latest: ExerciseLog | null;
   readonly weeksOfData: number;
   readonly percent: number; // текущий e1RM / целевой, 0–100
+  readonly chart: GoalChartModel;
+  readonly revision: Revision | null; // не null — показать баннер пересмотра
 }
+
+/** Баннер «оставить как есть» прячется до следующей недели, а не навсегда */
+const dismissKey = (goalId: string, today: string) => `goal-revision:${goalId}:${weekStart(today)}`;
+const DISMISSED = 'goal-revision-dismissed';
 
 const message = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 const minusDays = (date: string, days: number): string =>
@@ -33,22 +45,27 @@ const minusDays = (date: string, days: number): string =>
 
 export const ProgressStore = signalStore(
   withState<ProgressState>({
-    today: todayLocal(), goals: [], logs: [], exercises: [],
+    today: todayLocal(), goals: [], logs: [], exercises: [], cycle: null,
+    dismissed: draftStorage.read<string[]>(DISMISSED) ?? [],
     status: 'loading', error: null, editing: null, saving: false, formError: null,
   }),
-  withComputed(({ today, goals, logs, exercises }) => ({
+  withComputed(({ today, goals, logs, exercises, cycle, dismissed }) => ({
     cards: computed<readonly GoalCardVm[]>(() =>
       goals().map((item) => {
         const own = logs().filter((l) => l.exerciseId === item.goal.exerciseId);
         const { weekly, current: latest } = progressSeries(own, today());
         const current = weekly.at(-1)?.e1rm ?? 0;
         const target = e1rm(item.goal.targetKg, item.goal.targetReps);
+        const f = forecast(item.goal, weekly, today());
+        const hidden = dismissed().includes(dismissKey(item.id, today()));
         return {
           item,
-          forecast: forecast(item.goal, weekly, today()),
+          forecast: f,
+          revision: hidden ? null : revision(item.goal, f, current, today()),
           latest,
           weeksOfData: weekly.length,
           percent: Math.min(100, Math.round((current / target) * 100)),
+          chart: goalChart({ weekly, target, deadline: item.goal.deadline, today: today(), cycle: cycle() }),
         };
       }),
     ),
@@ -63,15 +80,24 @@ export const ProgressStore = signalStore(
       async load(): Promise<void> {
         patchState(store, { status: 'loading', error: null });
         try {
-          const [goals, exercises] = await Promise.all([repo.activeGoals(), repo.exercises()]); // независимы → параллельно
+          const [goals, exercises, cycle] = await Promise.all([repo.activeGoals(), repo.exercises(), repo.cycle()]); // независимы → параллельно
           const logs = await loadLogs(goals); // зависит от упражнений целей
-          patchState(store, { goals, exercises, logs, status: 'ready' });
+          patchState(store, { goals, exercises, cycle, logs, status: 'ready' });
         } catch (e) {
           patchState(store, { status: 'error', error: message(e) });
         }
       },
       edit(id: string | null): void {
         patchState(store, { editing: id, formError: null });
+      },
+      /** «Оставить как есть» — до следующей недели */
+      dismissRevision(goalId: string): void {
+        const key = dismissKey(goalId, store.today());
+        const thisWeek = weekStart(store.today());
+        // старые недели чистим, чтобы ключи не копились вечно
+        const dismissed = [...store.dismissed().filter((k) => k.endsWith(thisWeek)), key];
+        draftStorage.write(DISMISSED, dismissed);
+        patchState(store, { dismissed });
       },
       async save(input: GoalInput): Promise<void> {
         if (store.saving()) return;

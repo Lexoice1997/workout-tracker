@@ -1,7 +1,7 @@
 // apps/web/src/pages/today/ui/today.page.ts — экран «Сегодня» (вечер 3: план дня, без ввода)
 import { ChangeDetectionStrategy, Component, inject, input, type OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { SupabaseWorkoutRepository, WorkoutRepository } from '@web/entities/workout';
+import { OfflineWorkoutRepository, WorkoutRepository } from '@web/entities/workout';
 import { FinishPanel } from '@web/features/finish-workout';
 import { ExerciseCard } from '@web/widgets/exercise-card';
 import { formatDateLabel, weekdayShort } from '@web/shared/lib/format';
@@ -14,8 +14,8 @@ import { TodayStore } from '../model/today.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Стор и реализация репозитория живут, пока открыт экран. Здесь, а не в providers роута:
   // статический импорт в app.routes.ts затащил бы код экрана в начальный бандл.
-  // Подмена Supabase → Dexie в v1.1 — одна строка здесь.
-  providers: [TodayStore, { provide: WorkoutRepository, useClass: SupabaseWorkoutRepository }],
+  // Offline-декоратор: без сети подходы уходят в очередь IndexedDB (Dexie) и досылаются сами.
+  providers: [TodayStore, { provide: WorkoutRepository, useClass: OfflineWorkoutRepository }],
   template: `
     <div class="mx-auto flex max-w-2xl flex-col gap-4">
       @switch (store.programStatus()) {
@@ -33,11 +33,18 @@ import { TodayStore } from '../model/today.store';
         }
         @case ('ready') {
           <header class="flex flex-col gap-1">
-            <p class="text-[13px] text-stone-600">
-              {{ dateLabel(store.date()) }}
-              @if (store.weekInCycle(); as w) { · неделя {{ w }} из {{ store.deloadEvery() }} }
-              @if (store.isDeload()) { · <span class="font-semibold text-accent">разгрузка</span> }
-            </p>
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-[13px] text-stone-600">
+                {{ dateLabel(store.date()) }}
+                @if (store.weekInCycle(); as w) { · неделя {{ w }} из {{ store.deloadEvery() }} }
+                @if (store.isDeload()) { · <span class="font-semibold text-accent">разгрузка</span> }
+              </p>
+              <!-- на телефоне «Программы» нет в нижней панели — вход отсюда -->
+              <a routerLink="/program" class="-my-2 flex h-9 shrink-0 items-center gap-1.5 text-[13px] font-medium text-stone-700 hover:text-stone-900 lg:hidden">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7" /></svg>
+                Программа
+              </a>
+            </div>
             <h1 class="text-2xl font-bold">{{ store.day()?.title }}</h1>
             @if (store.dayStatus() === 'ready' && store.cards().length) {
               <p class="text-[13px] text-stone-600" aria-live="polite">Записано {{ store.loggedCount() }} из {{ store.cards().length }}</p>

@@ -4,7 +4,7 @@ import type { Tables } from '@tracker/db-types';
 import type { IsoDate } from '@tracker/domain';
 import { SUPABASE } from '@web/shared/api';
 import { uuid } from '@web/shared/lib/uuid';
-import type { ExerciseLog, ExerciseOption, GoalInput, GoalItem } from '../model/goal.types';
+import type { ExerciseLog, ExerciseOption, GoalInput, GoalItem, TrainingCycle } from '../model/goal.types';
 import { GoalRepository } from './goal.repository';
 
 const GOAL_COLUMNS = 'id, exercise_id, target_kg, target_reps, deadline, exercises(name)';
@@ -50,6 +50,17 @@ export class SupabaseGoalRepository extends GoalRepository {
       weightKg: Number(r.weight_kg),
       reps: r.reps,
     }));
+  }
+
+  override async cycle(): Promise<TrainingCycle | null> {
+    const { data, error } = await this.sb
+      .from('programs')
+      .select('cycle_start, deload_every')
+      .eq('is_active', true)
+      .not('user_id', 'is', null)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data?.cycle_start ? { start: data.cycle_start, every: data.deload_every } : null;
   }
 
   override async save(input: GoalInput): Promise<GoalItem> {

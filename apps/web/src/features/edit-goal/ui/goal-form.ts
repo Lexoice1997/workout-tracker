@@ -2,11 +2,12 @@
 import { ChangeDetectionStrategy, Component, computed, input, type OnInit, output, signal } from '@angular/core';
 import type { ExerciseOption, GoalInput, GoalItem } from '@web/entities/goal';
 import { todayLocal } from '@web/shared/lib/local-date';
-import { UiButton, UiNumberInput, UiStepper } from '@web/shared/ui';
+import { addDays, addMonths } from '@web/shared/lib/iso-date';
+import { UiButton, UiDatePicker, UiNumberInput, UiStepper, type DatePreset } from '@web/shared/ui';
 
 @Component({
   selector: 'app-goal-form',
-  imports: [UiButton, UiNumberInput, UiStepper],
+  imports: [UiButton, UiDatePicker, UiNumberInput, UiStepper],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form class="flex flex-col gap-3" (submit)="$event.preventDefault(); submit()">
@@ -30,8 +31,7 @@ import { UiButton, UiNumberInput, UiStepper } from '@web/shared/ui';
       </div>
       <div class="flex items-center justify-between gap-3">
         <label for="goal-deadline" class="text-sm text-stone-600">К дате</label>
-        <input id="goal-deadline" type="date" [min]="today" [value]="deadline()" (change)="deadline.set($any($event.target).value)"
-               class="h-11 rounded-xl border border-stone-300 bg-white px-3 text-base" />
+        <ui-date-picker inputId="goal-deadline" label="Срок цели" [min]="tomorrow" [presets]="presets" [(value)]="deadline" />
       </div>
 
       @if (error()) { <p role="alert" class="text-sm text-red-700">{{ error() }}</p> }
@@ -59,6 +59,11 @@ export class GoalForm implements OnInit {
   readonly remove = output<void>();
 
   protected readonly today = todayLocal();
+  protected readonly tomorrow = addDays(this.today, 1);
+  protected readonly presets: readonly DatePreset[] = [
+    { label: 'Через 3 мес', value: addMonths(this.today, 3) },
+    { label: 'Через 6 мес', value: addMonths(this.today, 6) },
+  ];
   protected readonly exerciseId = signal('');
   protected readonly kg = signal<number | null>(null);
   protected readonly reps = signal(8);

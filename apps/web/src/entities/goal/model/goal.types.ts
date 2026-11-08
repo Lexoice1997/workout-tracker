@@ -25,3 +25,9 @@ export interface ExerciseOption {
 export interface ExerciseLog extends DatedLog {
   readonly exerciseId: string;
 }
+
+/** Цикл программы — для серых полос разгрузки на графике */
+export interface TrainingCycle {
+  readonly start: IsoDate;
+  readonly every: number;
+}

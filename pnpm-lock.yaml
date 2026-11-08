@@ -41,6 +41,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.118.0
         version: 2.118.0
+      dexie:
+        specifier: 4.4.7
+        version: 4.4.7
       rxjs:
         specifier: ~7.8.0
         version: 7.8.2
@@ -3138,6 +3141,9 @@ packages:
     resolution: {integrity: sha512-epZuWb/6Q62L+nDHJc/hQAqf8pylsqgk3BpZXVBx1CDnr3nkrVNn73Uu1rXcFzkNcc+hkP3whuOg7JZYaQB65Q==}
     engines: {node: '>= 16.0.0'}
     hasBin: true
+
+  dexie@4.4.7:
+    resolution: {integrity: sha512-wemFiCl3DTCnfzyqepUTX1ugbYbkTrw3aEZOG7YjAOUoEQB5g5PrEywPzk5JpbX/SxqQ9IvjUpxCDIEjoOWEfA==}
 
   dom-serializer@3.1.1:
     resolution: {integrity: sha512-4MEa38/QexBob6gFNwu+EGdWvhJ1OKuNwdYY3Y3NyeWDQfnGeDYQUDfIRzWu5B5gsv03so2Uxd28YC6zrsx3Lw==}
@@ -7953,6 +7959,8 @@ snapshots:
   detect-port@2.1.0:
     dependencies:
       address: 2.0.3
+
+  dexie@4.4.7: {}
 
   dom-serializer@3.1.1:
     dependencies:

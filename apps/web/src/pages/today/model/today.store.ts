@@ -3,7 +3,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
-  cycleWeek, isDeloadWeek, isoWeekday, nextPlan, pickDay,
+  cycleWeek, isDeloadWeek, isoWeekday, nextPlan, pickDay, relevantLast,
   type ActiveProgram, type Plan, type PlanSlot, type SetLog, type Workout,
 } from '@tracker/domain';
 import { WorkoutRepository } from '@web/entities/workout';
@@ -77,11 +77,11 @@ export const TodayStore = signalStore( // без providedIn: живёт, пок�
     /** Неделя внутри цикла: 1…6, а не 1…∞ */
     const weekInCycle = computed(() => {
       const w = week();
-      return w === null ? null : ((w - 1) % deloadEvery()) + 1;
+      return w === null || w < 1 ? null : ((w - 1) % deloadEvery()) + 1; // старт цикла в будущем — номера нет
     });
     const cards = computed<readonly ExerciseCardVm[]>(() =>
       slots().map((slot) => {
-        const last = lastNormal()[slot.id] ?? null;
+        const last = relevantLast(slot, lastNormal()[slot.id] ?? null); // упражнение в слоте могли заменить
         return { slot, last, plan: nextPlan(slot, last, isDeload()), logged: todayLogs()[slot.id] ?? null };
       }),
     );

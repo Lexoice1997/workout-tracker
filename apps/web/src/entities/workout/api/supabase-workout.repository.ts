@@ -11,7 +11,7 @@ import { WorkoutRepository, type DayWorkout } from './workout.repository';
 const LOG_COLUMNS = 'id, workout_id, program_exercise_id, exercise_id, rep_min, rep_max, weight_kg, reps';
 const WORKOUT_COLUMNS = 'id, day_id, day_title, date, is_deload, cardio_min, note, finished_at';
 
-@Injectable()
+@Injectable({ providedIn: 'root' }) // root: им пользуется и очередь досылки (WorkoutOutbox)
 export class SupabaseWorkoutRepository extends WorkoutRepository {
   private readonly sb = inject(SUPABASE);
 

@@ -13,9 +13,7 @@ const DAY_MS = 86_400_000;
 
 /** Неделя цикла с 1. 'YYYY-MM-DD' парсится как UTC-полночь, поэтому переход на летнее время не сдвигает счёт. */
 export function cycleWeek(cycleStart: IsoDate, date: IsoDate): number {
-  return (
-    Math.floor((Date.parse(date) - Date.parse(cycleStart)) / DAY_MS / 7) + 1
-  );
+  return Math.floor((Date.parse(date) - Date.parse(cycleStart)) / DAY_MS / 7) + 1;
 }
 
 export const isDeloadWeek = (week: number, every: number): boolean =>
@@ -33,22 +31,24 @@ export function decide(ex: PlanSlot, last: SetLog): Decision {
   return ex.stepKg === null ? 'add-reps' : 'add';
 }
 
+/**
+ * Лог слота, который ещё относится к его упражнению.
+ * Упражнение в слоте заменили (жим ногами → гакк) — старый лог прогрессию не задаёт: старт заново с start_kg.
+ */
+export const relevantLast = (ex: PlanSlot, log: SetLog | null): SetLog | null =>
+  log !== null && log.exerciseId === ex.exerciseId ? log : null;
+
 /** @param lastNormal последний лог слота вне разгрузочной недели */
-export function nextPlan(
-  ex: PlanSlot,
-  lastNormal: SetLog | null,
-  deload: boolean,
-): Plan {
+export function nextPlan(ex: PlanSlot, lastNormalRaw: SetLog | null, deload: boolean): Plan {
+  const lastNormal = relevantLast(ex, lastNormalRaw);
   const base = lastNormal
-    ? lastNormal.weightKg +
-      (decide(ex, lastNormal) === 'add' ? (ex.stepKg ?? 0) : 0)
+    ? lastNormal.weightKg + (decide(ex, lastNormal) === 'add' ? (ex.stepKg ?? 0) : 0)
     : ex.startKg;
 
   if (!deload) return { weightKg: base, sets: ex.sets, isDeload: false };
 
   return {
-    weightKg:
-      base === null ? null : roundDownToStep(base * 0.9, ex.stepKg ?? 0.5),
+    weightKg: base === null ? null : roundDownToStep(base * 0.9, ex.stepKg ?? 0.5),
     sets: Math.ceil(ex.sets / 2),
     isDeload: true,
   };

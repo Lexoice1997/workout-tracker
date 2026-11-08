@@ -6,7 +6,13 @@
       "name": "app",
       "installMode": "prefetch",
       "resources": {
-        "files": ["/favicon.png", "/index.html", "/manifest.webmanifest", "/*.css", "/*.js"]
+        "files": [
+          "/favicon.png",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
       }
     },
     {
@@ -14,7 +20,23 @@
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
-        "files": ["/**/*.(svg|png|webp|avif|woff|woff2)"]
+        "files": [
+          "/**/*.(svg|png|webp|avif|woff|woff2)"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "supabase-rest",
+      "urls": [
+        "https://msecftduxfzbtgihsyem.supabase.co/rest/v1/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 300,
+        "maxAge": "14d",
+        "timeout": "5s"
       }
     }
   ]

@@ -1,12 +1,13 @@
 // apps/web/src/widgets/exercise-card/ui/exercise-card.ts — карточка упражнения: свёрнута / ввод / записано
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { decide, nextPlan, type Plan, type PlanSlot, type SetLog, type Workout } from '@tracker/domain';
+import { RouterLink } from '@angular/router';
 import { LogSetForm } from '@web/features/log-set';
 import { formatKg, formatReps, formatScheme } from '@web/shared/lib/format';
 
 @Component({
   selector: 'app-exercise-card',
-  imports: [LogSetForm],
+  imports: [LogSetForm, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="flex flex-col gap-3 rounded-2xl border bg-white p-4"
@@ -44,9 +45,13 @@ import { formatKg, formatReps, formatScheme } from '@web/shared/lib/format';
                   (click)="editing.set(true)">Изменить</button>
         }
       } @else if (expanded()) {
-        <p class="text-[13px] text-stone-600">
-          @if (last(); as l) { Прошлый раз: {{ kg(l.weightKg) }} кг × {{ reps(l.reps) }} } @else { Первый раз в этой программе }
-        </p>
+        <div class="flex items-baseline justify-between gap-3">
+          <p class="text-[13px] text-stone-600">
+            @if (last(); as l) { Прошлый раз: {{ kg(l.weightKg) }} кг × {{ reps(l.reps) }} } @else { Первый раз в этой программе }
+          </p>
+          <a routerLink="/program" [queryParams]="{ slot: slot().id }"
+             class="shrink-0 text-[13px] font-medium text-stone-600 underline-offset-4 hover:text-stone-900 hover:underline">Настроить</a>
+        </div>
         <app-log-set-form [slot]="slot()" [plan]="plan()" [workout]="workout()" (saved)="onSaved($event)" />
       } @else {
         <p class="text-[15px]"><span class="text-stone-600">План: </span><strong class="font-semibold">{{ planLabel() }}</strong></p>

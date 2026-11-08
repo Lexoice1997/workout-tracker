@@ -2,17 +2,21 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { GoalRepository, SupabaseGoalRepository } from '@web/entities/goal';
 import { GoalForm } from '@web/features/edit-goal';
+import { GoalChart } from '@web/widgets/goal-chart';
+import type { GoalInput } from '@web/entities/goal';
 import { formatKg, formatReps } from '@web/shared/lib/format';
 import { UiButton } from '@web/shared/ui';
 import { ProgressStore, type GoalCardVm } from '../model/progress.store';
 
 const DEADLINE = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const DAY_MONTH = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+const SHORT = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 const MONTH = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const pace = (kg: number) => (kg >= 0 ? '+' : '−') + formatKg(Math.abs(Number(kg.toFixed(1))));
 
 @Component({
   selector: 'app-progress-page',
-  imports: [GoalForm, UiButton],
+  imports: [GoalChart, GoalForm, UiButton],
   providers: [ProgressStore, { provide: GoalRepository, useClass: SupabaseGoalRepository }],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -56,6 +60,32 @@ const pace = (kg: number) => (kg >= 0 ? '+' : '−') + formatKg(Math.abs(Number(
                          [style.width.%]="card.percent"></div>
                   </div>
                   <p class="text-[13px]" [class]="paceClass(card)">{{ paceText(card) }}</p>
+                  @if (card.revision; as r) {
+                    <section class="flex flex-col gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3" aria-label="Пересмотр цели">
+                      @if (r.deadline || r.targetKg) {
+                        <p class="text-sm text-amber-950">
+                          При темпе {{ pace(card.forecast.actualPerWeek ?? 0) }} кг/нед к {{ deadline(card.item.goal.deadline) }} не успеть. Что поменять?
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                          @if (r.deadline; as d) {
+                            <button uiButton="secondary" size="md" type="button" class="flex-1" [disabled]="store.saving()"
+                                    (click)="store.save(revised(card, { deadline: d }))">На {{ shortDate(d) }}</button>
+                          }
+                          @if (r.targetKg; as t) {
+                            <button uiButton="secondary" size="md" type="button" class="flex-1" [disabled]="store.saving()"
+                                    (click)="store.save(revised(card, { targetKg: t }))">Цель {{ kg(t) }} × {{ card.item.goal.targetReps }}</button>
+                          }
+                        </div>
+                      } @else {
+                        <p class="text-sm text-amber-950">Прогресса нет 3+ недели. Посмотри на сон и восстановление или замени упражнение в программе.</p>
+                      }
+                      <button type="button" class="self-start text-[13px] font-medium text-amber-900 underline-offset-4 hover:underline"
+                              (click)="store.dismissRevision(card.item.id)">Оставить как есть</button>
+                    </section>
+                  }
+                  @if (card.chart.points.length) {
+                    <app-goal-chart class="mt-2" [model]="card.chart" [label]="card.item.name" />
+                  }
                   <div class="flex items-center justify-between">
                     <span class="text-[13px] text-stone-500">к {{ deadline(card.item.goal.deadline) }}</span>
                     <button type="button" class="h-9 text-sm font-medium text-stone-700 underline-offset-4 hover:underline"
@@ -86,6 +116,20 @@ export class ProgressPage {
   protected readonly store = inject(ProgressStore);
   protected readonly kg = formatKg;
   protected readonly reps = formatReps;
+
+  protected readonly pace = pace;
+
+  /** «24 мая», год — только если не текущий */
+  protected shortDate(date: string): string {
+    const d = new Date(`${date}T00:00:00Z`);
+    return date.slice(0, 4) === this.store.today().slice(0, 4) ? DAY_MONTH.format(d) : SHORT.format(d).replace(' г.', '');
+  }
+
+  /** Цель с одной поменянной частью — для кнопок баннера */
+  protected revised(card: GoalCardVm, patch: Partial<Pick<GoalInput, 'deadline' | 'targetKg'>>): GoalInput {
+    const g = card.item.goal;
+    return { id: card.item.id, exerciseId: g.exerciseId, targetKg: g.targetKg, targetReps: g.targetReps, deadline: g.deadline, ...patch };
+  }
 
   protected deadline(date: string): string {
     return DEADLINE.format(new Date(`${date}T00:00:00Z`)).replace(' г.', '');
