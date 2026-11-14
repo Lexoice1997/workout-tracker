@@ -1,4 +1,4 @@
-// apps/web/src/pages/more/ui/more.page.ts — «Ещё»: программа, экспорт, аккаунт (на телефоне — 5-я вкладка)
+// apps/web/src/pages/more/ui/more.page.ts — «Ещё»: программа, замеры, экспорт, аккаунт (на телефоне — 5-я вкладка)
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { SessionStore } from '@web/entities/session';
@@ -19,6 +19,14 @@ import { UiButton } from '@web/shared/ui';
         <span class="flex flex-col gap-0.5">
           <span class="text-[15px] font-semibold">Программа</span>
           <span class="text-[13px] text-stone-600">Упражнения, порядок, подходы и веса</span>
+        </span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="text-stone-400"><path d="M9 6l6 6-6 6" /></svg>
+      </a>
+
+      <a routerLink="/body" class="flex items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white p-4 hover:bg-stone-50">
+        <span class="flex flex-col gap-0.5">
+          <span class="text-[15px] font-semibold">Замеры</span>
+          <span class="text-[13px] text-stone-600">Вес, живот, грудь, бицепс — раз в месяц</span>
         </span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="text-stone-400"><path d="M9 6l6 6-6 6" /></svg>
       </a>

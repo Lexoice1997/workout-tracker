@@ -8,3 +8,4 @@ export * from './goals/weekly-best';
 export * from './body/body-metrics';
 export * from './goals/goal-chart';
 export * from './goals/goal-revision';
+export * from './nutrition/nutrition';

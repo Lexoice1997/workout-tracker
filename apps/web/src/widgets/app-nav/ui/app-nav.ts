@@ -9,14 +9,15 @@ interface NavItem {
   readonly path: string;
   readonly label: string;
   readonly icon: string; // d для <path> иконки 24×24
-  readonly mobile: boolean; // в нижней панели телефона 5 пунктов; «Программа» — через «Ещё» и ссылку на «Сегодня»
+  readonly mobile: boolean; // в нижней панели телефона 5 пунктов; «Программа» и «Замеры» (раз в месяц) — через «Ещё»
 }
 
 const ITEMS: readonly NavItem[] = [
   { mobile: true, path: '/today', label: 'Сегодня', icon: 'M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12' },
   { mobile: true, path: '/history', label: 'История', icon: 'M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1' },
   { mobile: true, path: '/progress', label: 'Прогресс', icon: 'M3 20h18M6 16l4-5 3 3 5-7' },
-  { mobile: true, path: '/body', label: 'Замеры', icon: 'M3 8h18v8H3zM7 8v3M11 8v4M15 8v3M19 8v4' },
+  { mobile: true, path: '/nutrition', label: 'Питание', icon: 'M7 3v8a2 2 0 0 0 4 0V3M9 13v8M17 21V3c-2 0-3.5 2.5-3.5 6s1.5 4 3.5 4' },
+  { mobile: false, path: '/body', label: 'Замеры', icon: 'M3 8h18v8H3zM7 8v3M11 8v4M15 8v3M19 8v4' },
   { mobile: false, path: '/program', label: 'Программа', icon: 'M4 6h16M4 12h10M4 18h7' },
   { mobile: true, path: '/more', label: 'Ещё', icon: 'M4 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M18 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0' },
 ];

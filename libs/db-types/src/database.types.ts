@@ -106,18 +106,72 @@ export type Database = {
           },
         ]
       }
+      meals: {
+        Row: {
+          id: string
+          user_id: string
+          date: string
+          slot: string
+          title: string
+          items: Json
+          kcal: number
+          protein_g: number
+          fat_g: number
+          carbs_g: number
+          source: string
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          date: string
+          slot: string
+          title: string
+          items?: Json
+          kcal: number
+          protein_g: number
+          fat_g: number
+          carbs_g: number
+          source?: string
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          date?: string
+          slot?: string
+          title?: string
+          items?: Json
+          kcal?: number
+          protein_g?: number
+          fat_g?: number
+          carbs_g?: number
+          source?: string
+          note?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           user_id: string
           timezone: string
+          kcal_target: number | null
+          protein_target_g: number | null
         }
         Insert: {
           user_id?: string
           timezone?: string
+          kcal_target?: number | null
+          protein_target_g?: number | null
         }
         Update: {
           user_id?: string
           timezone?: string
+          kcal_target?: number | null
+          protein_target_g?: number | null
         }
         Relationships: []
       }
