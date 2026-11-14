@@ -33,7 +33,7 @@ import { UiButton, UiStepper } from '@web/shared/ui';
         <label for="finish-note" class="text-sm font-medium">Заметка</label>
         <textarea id="finish-note" rows="3" maxlength="500" placeholder="Самочувствие, что поменять"
                   [value]="note()" (input)="note.set($any($event.target).value)"
-                  class="resize-none rounded-xl border border-stone-300 bg-white px-3.5 py-3 text-[15px] outline-none
+                  class="resize-none rounded-xl border border-stone-300 bg-white px-3.5 py-3 text-base outline-none
                          focus:border-accent focus:ring-2 focus:ring-accent/30"></textarea>
       </div>
 

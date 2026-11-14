@@ -9,6 +9,10 @@
 }
 
 @layer base {
-  html { -webkit-tap-highlight-color: transparent; }
+  /* touch-action: manipulation — без зума по двойному тапу: быстрые тапы по ± больше не увеличивают страницу.
+     Щипок двумя пальцами остаётся. Свойство действует на всех потомков (браузер пересекает значения по цепочке). */
+  html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  /* и прямо на контролах — так надёжнее в старых iOS Safari */
+  button, a, label, input, select, textarea, [role='button'], [role='radio'] { touch-action: manipulation; }
   body { @apply bg-stone-100 text-stone-900 antialiased; }
 }

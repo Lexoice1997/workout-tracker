@@ -21,7 +21,7 @@ export const SLOT_LABEL: Readonly<Record<MealSlot, string>> = {
 };
 
 const INPUT =
-  'h-11 w-full min-w-0 rounded-xl border border-stone-300 bg-white px-2 text-[15px] tabular-nums outline-none ' +
+  'h-11 w-full min-w-0 rounded-xl border border-stone-300 bg-white px-2 text-base tabular-nums outline-none ' + // text-base: при шрифте < 16px iOS зумит при фокусе
   'focus:border-accent focus:ring-2 focus:ring-accent/30';
 
 const fmt = (n: number) => formatKg(Math.round(n));
